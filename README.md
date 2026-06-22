@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cyberpunk OS Developer Portfolio & Recruiter Engine
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
-First, run the development server:
+An immersive, high-performance developer portfolio styled as an interactive **Cyberpunk Operating System (OS)**. Built using **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4**, and **Supabase**, this project goes beyond a standard static portfolio to provide an automated lead-funnel for recruiters and managers.
 
+---
+
+## 🚀 Key Features
+
+*   **Immersive Cyberpunk OS theme:** Rich visual styling with glassmorphic dashboards, customizable terminal interfaces, and high-frequency neon layout glowing accents.
+*   **Recruiter CTA & Resume Customization:** Built-in engine designed to generate dynamically optimized resume keywords and tracks recruiter engagement analytics.
+*   **Advanced Project Gallery (CMS):** Supports multiple screenshots and image attachments per project. Includes a fluid Framer Motion carousel with lightbox zooming features.
+*   **Dynamic Social Integration:** Centered, floating social links container above the page footer resolving LinkedIn, GitHub, Instagram, and Message/Email options directly from Supabase databases.
+*   **Robust Admin Dashboard:** Full administration suite with secure authentication allowing real-time edits for project details, profile metadata, timeline events, and visitor logs.
+
+---
+
+## 🛠️ Technology Stack
+
+*   **Frontend:** React 19, Next.js 16 (App Router)
+*   **Styling:** Tailwind CSS v4, Vanilla CSS variables, Framer Motion (for physics-based transitions)
+*   **Backend Database:** Supabase PostgreSQL
+*   **File Storage:** Supabase Storage (for avatars and project screenshot uploads)
+*   **Development Server:** Webpack Dev Server (configured as fallback to bypass project workspace path collisions)
+
+---
+
+## 💻 Getting Started
+
+### 1. Prerequisites
+Ensure you have the following installed:
+*   [Node.js (v18.x or newer)](https://nodejs.org/)
+*   [Git](https://git-scm.com/)
+
+### 2. Installation
+Clone the repository and install the dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone the repository
+git clone https://github.com/Shivaramnnp/my_portfolio.git
+cd my_portfolio
+
+# Install NPM dependencies
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Configuration
+Create a `.env.local` file in the root directory of your project:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Running the Development Server
+Due to local path configurations (like having `.git` folders in home directories), the default dev compiler utilizes standard Webpack compiler stability.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Start the dev server:
+```bash
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) inside your browser to view your Cyberpunk OS Portfolio.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🗄️ Database Setup & Migrations
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All SQL schemas are located inside the `supabase/migrations/` directory.
 
-## Deploy on Vercel
+To apply migrations manually or configure your local database:
+1. Initialize your tables using the schemas in:
+   *   [20260621000000_initial_schema.sql](file:///Users/shivarampatel/Desktop/my_portfolio/supabase/migrations/20260621000000_initial_schema.sql)
+   *   [20260621110000_analytics_schema.sql](file:///Users/shivarampatel/Desktop/my_portfolio/supabase/migrations/20260621110000_analytics_schema.sql)
+   *   [20260621120000_resume_variants.sql](file:///Users/shivarampatel/Desktop/my_portfolio/supabase/migrations/20260621120000_resume_variants.sql)
+2. Enable RLS (Row Level Security) and configure read-access policies.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📁 Architecture Overview
+
+```text
+├── public/                 # Static assets (SVGs, icons)
+├── src/
+│   ├── app/                # Next.js App Router (pages and API endpoints)
+│   │   ├── (admin)/        # Secure Admin Panel routes
+│   │   ├── api/            # Server Actions & API endpoints
+│   │   └── page.tsx        # Portfolio main home dashboard
+│   ├── components/
+│   │   ├── admin/          # Form layouts, uploader, admin buttons
+│   │   ├── public/         # OS interface, timeline, chat panel
+│   │   └── shared/         # Navbar, Custom dynamic Footer
+│   ├── hooks/              # Custom React hooks (analytics, theme)
+│   └── lib/                # Supabase configurations & helpers
+└── supabase/               # SQL migrations and database setup
+```
