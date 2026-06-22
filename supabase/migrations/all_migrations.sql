@@ -1,0 +1,252 @@
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Profiles & Settings
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT,
+  title TEXT,
+  bio TEXT,
+  email TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE seo_settings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  page_path TEXT UNIQUE NOT NULL,
+  page_title TEXT,
+  meta_description TEXT,
+  og_image_url TEXT,
+  keywords TEXT[],
+  canonical_url TEXT
+);
+
+CREATE TABLE social_links (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  platform TEXT NOT NULL,
+  url TEXT NOT NULL,
+  icon_name TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- Projects & Case Studies
+CREATE TABLE projects (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  short_description TEXT,
+  problem_statement TEXT,
+  solution TEXT,
+  architecture TEXT,
+  challenges TEXT,
+  lessons_learned TEXT,
+  live_url TEXT,
+  github_url TEXT,
+  demo_video_url TEXT,
+  tech_stack TEXT[],
+  is_featured BOOLEAN DEFAULT false,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE project_images (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+  image_url TEXT NOT NULL,
+  caption TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+CREATE TABLE project_metrics (
+  project_id UUID REFERENCES projects(id) ON DELETE CASCADE PRIMARY KEY,
+  views INTEGER DEFAULT 0,
+  github_stars INTEGER DEFAULT 0,
+  likes INTEGER DEFAULT 0
+);
+
+-- Experience, Education, Certifications & Timeline
+CREATE TABLE experiences (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company TEXT NOT NULL,
+  role TEXT NOT NULL,
+  location TEXT,
+  start_date DATE NOT NULL,
+  end_date DATE,
+  is_current BOOLEAN DEFAULT false,
+  description TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+CREATE TABLE education (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  institution TEXT NOT NULL,
+  degree TEXT NOT NULL,
+  field_of_study TEXT,
+  start_date DATE,
+  end_date DATE,
+  grade TEXT,
+  description TEXT
+);
+
+CREATE TABLE certifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  issuing_organization TEXT NOT NULL,
+  issue_date DATE,
+  credential_id TEXT,
+  credential_url TEXT
+);
+
+CREATE TABLE timeline_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  year INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT
+);
+
+-- Skills & Resume
+CREATE TABLE skills (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  category TEXT NOT NULL,
+  name TEXT NOT NULL,
+  level INTEGER,
+  icon_name TEXT
+);
+
+CREATE TABLE resume_versions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  version_name TEXT NOT NULL,
+  file_url TEXT NOT NULL,
+  is_active BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Blog, /now, CRM, and Newsletter
+CREATE TABLE blog_posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  excerpt TEXT,
+  content TEXT,
+  cover_image TEXT,
+  is_published BOOLEAN DEFAULT false,
+  published_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE now_status (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  currently_learning TEXT[],
+  currently_building TEXT[],
+  current_goal TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  subject TEXT,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'unread',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email TEXT UNIQUE NOT NULL,
+  status TEXT DEFAULT 'active',
+  subscribed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Analytics
+CREATE TABLE visitor_sessions (
+  session_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ip_address TEXT,
+  user_agent TEXT,
+  location TEXT,
+  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  ended_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE analytics_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id UUID REFERENCES visitor_sessions(session_id) ON DELETE SET NULL,
+  event_type TEXT NOT NULL,
+  path TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- RLS Settings (Example: Public read for most tables, authenticated write)
+-- Note: Replace with actual secure policies in production
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public profiles are viewable by everyone." ON projects FOR SELECT USING (true);
+-- Create analytics_events table
+CREATE TABLE analytics_events (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    event_type VARCHAR(255) NOT NULL, -- e.g., 'project_view', 'github_click', 'live_demo_click', 'demo_video_play', 'recruiter_visit', 'resume_download', 'ai_conversation'
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE, -- Optional, only if event is related to a project
+    metadata JSONB, -- Any extra data
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+-- Enable RLS
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+
+-- Allow anonymous inserts for tracking
+CREATE POLICY "Allow public insert to analytics_events" ON analytics_events
+    FOR INSERT WITH CHECK (true);
+
+-- Allow authenticated users (admin) to read analytics
+CREATE POLICY "Allow authenticated read analytics_events" ON analytics_events
+    FOR SELECT USING (auth.role() = 'authenticated');
+-- Create Resume Variants table
+CREATE TABLE resume_variants (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    title VARCHAR(255) NOT NULL, -- e.g., 'Google Internship', 'Software Engineer'
+    template_type VARCHAR(50) DEFAULT 'portfolio', -- 'ats' or 'portfolio'
+    is_public_default BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+-- Ensure only one public default exists at a time
+CREATE UNIQUE INDEX only_one_public_default ON resume_variants (is_public_default) WHERE is_public_default = true;
+
+-- Linking tables for specific selections
+CREATE TABLE resume_variant_projects (
+    variant_id UUID REFERENCES resume_variants(id) ON DELETE CASCADE,
+    project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
+    sort_order INTEGER DEFAULT 0,
+    PRIMARY KEY (variant_id, project_id)
+);
+
+CREATE TABLE resume_variant_skills (
+    variant_id UUID REFERENCES resume_variants(id) ON DELETE CASCADE,
+    skill_id UUID REFERENCES skills(id) ON DELETE CASCADE,
+    PRIMARY KEY (variant_id, skill_id)
+);
+
+CREATE TABLE resume_variant_experiences (
+    variant_id UUID REFERENCES resume_variants(id) ON DELETE CASCADE,
+    experience_id UUID REFERENCES experiences(id) ON DELETE CASCADE,
+    PRIMARY KEY (variant_id, experience_id)
+);
+
+-- Enable RLS
+ALTER TABLE resume_variants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resume_variant_projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resume_variant_skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resume_variant_experiences ENABLE ROW LEVEL SECURITY;
+
+-- Public read access policies
+CREATE POLICY "Allow public read resume_variants" ON resume_variants FOR SELECT USING (true);
+CREATE POLICY "Allow public read resume_variant_projects" ON resume_variant_projects FOR SELECT USING (true);
+CREATE POLICY "Allow public read resume_variant_skills" ON resume_variant_skills FOR SELECT USING (true);
+CREATE POLICY "Allow public read resume_variant_experiences" ON resume_variant_experiences FOR SELECT USING (true);
+
+-- Authenticated all access policies
+CREATE POLICY "Allow admin all resume_variants" ON resume_variants USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow admin all resume_variant_projects" ON resume_variant_projects USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow admin all resume_variant_skills" ON resume_variant_skills USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow admin all resume_variant_experiences" ON resume_variant_experiences USING (auth.role() = 'authenticated');
