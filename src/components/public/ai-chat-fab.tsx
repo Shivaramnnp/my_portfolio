@@ -10,7 +10,7 @@ export function AiChatFab() {
   const [isOpen, setIsOpen] = useState(false)
   const [hasTrackedChat, setHasTrackedChat] = useState(false)
   const { trackEvent } = useAnalytics()
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = (useChat as any)({
+  const { messages, input = "", handleInputChange, handleSubmit, isLoading } = (useChat as any)({
     api: '/api/chat',
   })
 
@@ -113,7 +113,7 @@ export function AiChatFab() {
                 />
                 <button 
                   type="submit" 
-                  disabled={isLoading || !input.trim()}
+                  disabled={isLoading || !(input || "").trim()}
                   className="absolute right-1 p-1.5 rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition-opacity"
                 >
                   <Send size={16} />
