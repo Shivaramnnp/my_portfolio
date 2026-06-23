@@ -4,22 +4,44 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MessageSquare, X, Send } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
+import { DefaultChatTransport } from "ai"
 import { useAnalytics } from "@/hooks/use-analytics"
+
+function getMessageText(message: any): string {
+  if (typeof message.content === 'string') {
+    return message.content
+  }
+  if (Array.isArray(message.parts)) {
+    return message.parts
+      .filter((part: any) => part.type === 'text')
+      .map((part: any) => part.text)
+      .join('')
+  }
+  return ''
+}
 
 export function AiChatFab() {
   const [isOpen, setIsOpen] = useState(false)
   const [hasTrackedChat, setHasTrackedChat] = useState(false)
   const { trackEvent } = useAnalytics()
-  const { messages, input = "", handleInputChange, handleSubmit, isLoading } = (useChat as any)({
-    api: '/api/chat',
+  const [input, setInput] = useState("")
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+    }),
   })
+  const isLoading = status === "submitted" || status === "streaming"
 
   const handleChatSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!input.trim()) return
+
     if (!hasTrackedChat) {
       trackEvent("ai_conversation")
       setHasTrackedChat(true)
     }
-    handleSubmit(e)
+    sendMessage({ text: input })
+    setInput("")
   }
 
   return (
@@ -80,7 +102,7 @@ export function AiChatFab() {
                       }`}
                     >
                       {/* Very basic markdown rendering for MVP. A real app would use react-markdown */}
-                      {message.content.split('\n').map((line: string, i: number) => (
+                      {getMessageText(message).split('\n').map((line: string, i: number) => (
                         <p key={i} className="mb-1 last:mb-0">{line}</p>
                       ))}
                     </div>
@@ -106,14 +128,14 @@ export function AiChatFab() {
                 <input
                   type="text"
                   value={input}
-                  onChange={handleInputChange}
+                  onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask a question..."
                   className="w-full bg-muted border border-border rounded-full pl-4 pr-12 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   disabled={isLoading}
                 />
                 <button 
                   type="submit" 
-                  disabled={isLoading || !(input || "").trim()}
+                  disabled={isLoading || !input.trim()}
                   className="absolute right-1 p-1.5 rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition-opacity"
                 >
                   <Send size={16} />
