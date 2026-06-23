@@ -30,6 +30,8 @@ export default async function ProfileManagementPage({
     const bio = formData.get("bio") as string
     const email = formData.get("email") as string
     const os_name = formData.get("os_name") as string || "ShivaOS"
+    const welcome_message = formData.get("welcome_message") as string
+    const availability_status = formData.get("availability_status") as string
     const avatarFile = formData.get("avatar") as File | null
     const removeAvatar = formData.get("remove_avatar") === "on"
 
@@ -53,6 +55,8 @@ export default async function ProfileManagementPage({
       email,
       avatar_url: avatarUrl,
       os_name,
+      welcome_message,
+      availability_status,
       updated_at: new Date().toISOString()
     })
 

@@ -21,12 +21,16 @@ interface HeroProps {
     bio?: string
     email?: string
     avatar_url?: string
+    welcome_message?: string | null
+    availability_status?: string | null
   } | null
 }
 
 export function Hero({ profile }: HeroProps) {
   const name = profile?.full_name || "Shivaram Nunugonda"
   const title = profile?.title || "AI & ML Engineer · Android Developer"
+  const welcomeMessage = profile?.welcome_message || "WELCOME TO MY DIGITAL WORKSPACE"
+  const availabilityStatus = profile?.availability_status || "Available for Internship · Summer 2026"
   const hasAvatar = !!profile?.avatar_url
 
   return (
@@ -44,9 +48,22 @@ export function Hero({ profile }: HeroProps) {
           {/* Left Column: Content */}
           <div className="flex-1 max-w-4xl flex flex-col items-start w-full">
             
+            {/* Welcome message */}
+            {welcomeMessage && (
+              <motion.div
+                custom={0}
+                initial="hidden"
+                animate="visible"
+                variants={fadeUp}
+                className="mb-3 text-xs md:text-sm font-mono tracking-[0.25em] text-primary uppercase font-bold"
+              >
+                {welcomeMessage}
+              </motion.div>
+            )}
+
             {/* Status badge */}
             <motion.div
-              custom={0}
+              custom={0.5}
               initial="hidden"
               animate="visible"
               variants={fadeUp}
@@ -57,7 +74,7 @@ export function Hero({ profile }: HeroProps) {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
                 </span>
-                Available for Internship · Summer 2026
+                {availabilityStatus}
               </div>
             </motion.div>
 

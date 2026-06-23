@@ -12,7 +12,10 @@ interface Profile {
   email: string | null
   avatar_url: string | null
   os_name: string | null
+  welcome_message?: string | null
+  availability_status?: string | null
 }
+
 
 interface ProfileFormProps {
   profile: Profile | null
@@ -109,6 +112,35 @@ export function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
         />
         <p className="text-xs text-muted-foreground">This name is displayed in the sidebar, header, footer, and page metadata.</p>
       </div>
+
+      <div className="space-y-2">
+        <label htmlFor="welcome_message" className="block text-sm font-medium">Welcome Message (Homepage Top Text)</label>
+        <input 
+          type="text" 
+          id="welcome_message" 
+          name="welcome_message" 
+          defaultValue={profile?.welcome_message || ""} 
+          placeholder="e.g. WELCOME TO MY DIGITAL WORKSPACE" 
+          className="w-full p-2.5 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary outline-none" 
+          disabled={isPending}
+        />
+        <p className="text-xs text-muted-foreground">Monospace uppercase text displayed at the top of the homepage hero section.</p>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="availability_status" className="block text-sm font-medium">Availability Status (Badge Text)</label>
+        <input 
+          type="text" 
+          id="availability_status" 
+          name="availability_status" 
+          defaultValue={profile?.availability_status || ""} 
+          placeholder="e.g. Available for Internship · Summer 2026" 
+          className="w-full p-2.5 rounded-md border border-input bg-background focus:ring-2 focus:ring-primary outline-none" 
+          disabled={isPending}
+        />
+        <p className="text-xs text-muted-foreground">Text displayed inside the glowing availability green-dot badge.</p>
+      </div>
+
 
       <div className="space-y-2">
         <label htmlFor="title" className="block text-sm font-medium">Professional Title</label>
