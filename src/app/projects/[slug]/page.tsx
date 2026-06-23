@@ -18,6 +18,12 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
     notFound()
   }
 
+  // Log project view event
+  await supabase.from('analytics_events').insert({
+    event_type: 'project_view',
+    project_id: project.id
+  })
+
   // Helper to render markdown-like content safely for MVP
   const renderText = (text: string | null) => {
     if (!text) return null;

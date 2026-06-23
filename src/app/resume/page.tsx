@@ -9,6 +9,11 @@ export const metadata = {
 export default async function PublicResumePage() {
   const supabase = await createClient()
 
+  // Log resume download event
+  await supabase.from('analytics_events').insert({
+    event_type: 'resume_download'
+  })
+
   // Find the public default variant
   const { data: defaultVariant } = await supabase
     .from('resume_variants')

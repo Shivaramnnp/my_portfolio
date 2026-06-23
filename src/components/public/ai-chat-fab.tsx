@@ -4,12 +4,23 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { MessageSquare, X, Send } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
+import { useAnalytics } from "@/hooks/use-analytics"
 
 export function AiChatFab() {
   const [isOpen, setIsOpen] = useState(false)
+  const [hasTrackedChat, setHasTrackedChat] = useState(false)
+  const { trackEvent } = useAnalytics()
   const { messages, input, handleInputChange, handleSubmit, isLoading } = (useChat as any)({
     api: '/api/chat',
   })
+
+  const handleChatSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    if (!hasTrackedChat) {
+      trackEvent("ai_conversation")
+      setHasTrackedChat(true)
+    }
+    handleSubmit(e)
+  }
 
   return (
     <>
@@ -90,7 +101,7 @@ export function AiChatFab() {
             </div>
 
             {/* Input Area */}
-            <form onSubmit={handleSubmit} className="p-3 border-t border-border bg-background">
+            <form onSubmit={handleChatSubmit} className="p-3 border-t border-border bg-background">
               <div className="relative flex items-center">
                 <input
                   type="text"

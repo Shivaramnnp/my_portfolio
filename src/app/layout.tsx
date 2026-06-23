@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
 import { AiChatFab } from "@/components/public/ai-chat-fab";
+import { AnalyticsTracker } from "@/components/shared/analytics-tracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,7 @@ export default function RootLayout({
         >
           <div className="relative flex min-h-screen flex-col">
             <Navbar />
+            <AnalyticsTracker />
             <main className="flex-1">{children}</main>
             <AiChatFab />
             <Footer />
