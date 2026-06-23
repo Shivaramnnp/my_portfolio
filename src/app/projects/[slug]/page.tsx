@@ -77,6 +77,17 @@ export default async function ProjectCaseStudyPage({ params }: { params: Promise
         {/* Left Column: The Case Study */}
         <div className="lg:col-span-8 space-y-16">
           
+          {/* Project Screenshot */}
+          {project.image_url && (
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-border bg-muted/10 shadow-lg">
+              <img 
+                src={project.image_url} 
+                alt={`${project.title} Screenshot`} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
           {/* Problem Statement */}
           {project.problem_statement && (
             <section>
