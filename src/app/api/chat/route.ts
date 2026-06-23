@@ -58,5 +58,5 @@ Rules:
     messages: coreMessages,
   })
 
-  return result.toTextStreamResponse()
+  return result.toUIMessageStreamResponse()
 }
