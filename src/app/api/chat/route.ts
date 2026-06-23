@@ -1,5 +1,5 @@
 import { google } from '@ai-sdk/google'
-import { streamText } from 'ai'
+import { streamText, convertToModelMessages } from 'ai'
 import { createClient } from '@/lib/supabase/server'
 
 // Allow streaming responses up to 30 seconds
@@ -50,10 +50,12 @@ Rules:
 3. Be concise, polite, and enthusiastic.
 4. Format responses using Markdown (bullet points, bold text).`
 
+  const coreMessages = await convertToModelMessages(messages)
+
   const result = streamText({
     model: google('gemini-2.5-flash'),
     system: systemPrompt,
-    messages,
+    messages: coreMessages,
   })
 
   return result.toTextStreamResponse()
